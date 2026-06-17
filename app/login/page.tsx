@@ -6,29 +6,40 @@ import { supabase } from "@/lib/supabaseClient";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   async function signUp() {
-    const { error } = await supabase.auth.signUp({
+    setMessage("Creating account...");
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
 
+    console.log("SIGNUP DATA:", data);
+    console.log("SIGNUP ERROR:", error);
+
     if (error) {
-      alert(error.message);
+      setMessage(error.message);
       return;
     }
 
-    alert("Account created. You can now log in.");
+    setMessage("Account created. Check Supabase Authentication → Users.");
   }
 
   async function login() {
-    const { error } = await supabase.auth.signInWithPassword({
+    setMessage("Logging in...");
+
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
+    console.log("LOGIN DATA:", data);
+    console.log("LOGIN ERROR:", error);
+
     if (error) {
-      alert(error.message);
+      setMessage(error.message);
       return;
     }
 
@@ -62,6 +73,14 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+
+          {message && (
+            <div className="rounded-3xl border-soft bg-warning p-5">
+              <p className="whitespace-pre-wrap font-bold text-[var(--foreground)]">
+                {message}
+              </p>
+            </div>
+          )}
 
           <button onClick={login} className="btn-primary w-full">
             Login
