@@ -4,6 +4,7 @@ import { useState } from "react";
 import AppHeader from "@/components/app-header";
 import { supabase } from "@/lib/supabaseClient";
 import { createTopicKey } from "@/lib/createTopicKey";
+import type { RevisionSet, RevisionTopic } from "../../types/topic";
 
 export default function NewTopicPage() {
   const [subject, setSubject] = useState("");
@@ -40,65 +41,121 @@ export default function NewTopicPage() {
         return;
       }
 
-      const topicKey = createTopicKey(subject, ageLevel, topics);
+      const finalTopics: RevisionTopic[] = [];
 
-      const { data: existingSet, error: existingError } = await supabase
-        .from("revision_sets")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("topic_key", topicKey)
-        .maybeSingle();
+      for (const topicTitle of topics) {
+        const topicKey = createTopicKey(subject, ageLevel, topicTitle);
 
-      if (existingError) {
-        throw new Error(existingError.message);
+        const { data: existingLibraryTopic, error: librarySearchError } =
+          await supabase
+            .from("topic_library")
+            .select("*")
+            .eq("topic_key", topicKey)
+            .maybeSingle();
+
+        if (librarySearchError) {
+          throw new Error(librarySearchError.message);
+        }
+
+        let topicLibraryId = existingLibraryTopic?.id;
+        let topicContent: RevisionTopic | null = existingLibraryTopic?.content;
+
+        if (!existingLibraryTopic) {
+          const response = await fetch("/api/generate-revision", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              subject,
+              ageLevel,
+              topics: [topicTitle],
+            }),
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Failed to generate revision content.");
+          }
+
+          const generatedSet = await response.json();
+          topicContent = generatedSet.topics[0];
+
+          const { data: insertedLibraryTopic, error: insertLibraryError } =
+            await supabase
+              .from("topic_library")
+              .insert({
+                subject,
+                topic: topicTitle,
+                level: ageLevel,
+                topic_key: topicKey,
+                content: topicContent,
+              })
+              .select()
+              .single();
+
+          if (insertLibraryError) {
+            throw new Error(insertLibraryError.message);
+          }
+
+          topicLibraryId = insertedLibraryTopic.id;
+        }
+
+        if (!topicLibraryId || !topicContent) {
+          throw new Error(`Could not load topic: ${topicTitle}`);
+        }
+
+        const { data: existingUserRevision, error: userRevisionSearchError } =
+          await supabase
+            .from("user_revision_sets")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("topic_library_id", topicLibraryId)
+            .maybeSingle();
+
+        if (userRevisionSearchError) {
+          throw new Error(userRevisionSearchError.message);
+        }
+
+        let userRevisionSetId = existingUserRevision?.id;
+        let revised = existingUserRevision?.revised ?? false;
+
+        if (!existingUserRevision) {
+          const { data: insertedUserRevision, error: insertUserRevisionError } =
+            await supabase
+              .from("user_revision_sets")
+              .insert({
+                user_id: user.id,
+                topic_library_id: topicLibraryId,
+                revised: false,
+                user_notes: "",
+              })
+              .select()
+              .single();
+
+          if (insertUserRevisionError) {
+            throw new Error(insertUserRevisionError.message);
+          }
+
+          userRevisionSetId = insertedUserRevision.id;
+          revised = false;
+        }
+
+        finalTopics.push({
+          ...topicContent,
+          topicLibraryId,
+          userRevisionSetId,
+          revised,
+        });
       }
 
-      if (existingSet) {
-        localStorage.setItem("revision-set-id", existingSet.id);
-        localStorage.setItem("revision-set", JSON.stringify(existingSet.content));
-        window.location.href = "/topics/preview";
-        return;
-      }
+      const revisionSet: RevisionSet = {
+        subject,
+        ageLevel,
+        topics: finalTopics,
+      };
 
-      const response = await fetch("/api/generate-revision", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          subject,
-          ageLevel,
-          topics,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Failed to generate revision content.");
-      }
-
-      const responseText = await response.text();
-      const generatedRevision = JSON.parse(responseText);
-
-      const { data: insertedSet, error: insertError } = await supabase
-        .from("revision_sets")
-        .insert({
-          user_id: user.id,
-          subject,
-          age_level: ageLevel,
-          topic_key: topicKey,
-          content: generatedRevision,
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        throw new Error(insertError.message);
-      }
-
-      localStorage.setItem("revision-set-id", insertedSet.id);
-      localStorage.setItem("revision-set", JSON.stringify(generatedRevision));
-
+      localStorage.setItem("revision-set", JSON.stringify(revisionSet));
       window.location.href = "/topics/preview";
     } catch (error) {
       console.error(error);
@@ -128,6 +185,8 @@ export default function NewTopicPage() {
           </h1>
 
           <p className="mt-4 max-w-xl text-lg leading-8 text-muted">
+            The app checks the shared topic library first. If a topic is not
+            saved yet, Gemini creates it and saves it for future use.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8">
@@ -149,7 +208,7 @@ export default function NewTopicPage() {
 
               <div>
                 <label className="mb-2 block text-base font-bold text-[var(--foreground)]">
-                  Year Group
+                  Year Group / Level
                 </label>
 
                 <input
@@ -195,7 +254,7 @@ export default function NewTopicPage() {
                 type="submit"
                 disabled={isGenerating}
               >
-                {isGenerating ? "Checking and generating..." : "Create Revision"}
+                {isGenerating ? "Checking library..." : "Create Revision"}
               </button>
             </div>
           </form>

@@ -15,6 +15,8 @@ export type RevisionTopic = {
   userNotes: string;
   revised: boolean;
   quiz: QuizQuestion[];
+  topicLibraryId?: string;
+  userRevisionSetId?: string;
 };
 
 export type RevisionSet = {

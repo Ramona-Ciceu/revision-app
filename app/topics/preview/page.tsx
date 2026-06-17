@@ -29,15 +29,15 @@ export default function PreviewTopicPage() {
     setRevisionSet(updatedSet);
     localStorage.setItem("revision-set", JSON.stringify(updatedSet));
 
-    const revisionSetId = localStorage.getItem("revision-set-id");
+    const topic = updatedSet.topics[topicIndex];
 
-    if (revisionSetId) {
+    if (topic.userRevisionSetId) {
       const { error } = await supabase
-        .from("revision_sets")
+        .from("user_revision_sets")
         .update({
-          content: updatedSet,
+          revised,
         })
-        .eq("id", revisionSetId);
+        .eq("id", topic.userRevisionSetId);
 
       if (error) {
         console.error("Failed to update revised status:", error.message);
@@ -90,7 +90,7 @@ export default function PreviewTopicPage() {
           </h1>
 
           <p className="mt-3 text-lg leading-8 text-muted">
-            {revisionSet.ageLevel || "Year group not added"} • {revisedCount}/
+            {revisionSet.ageLevel || "Level not added"} • {revisedCount}/
             {revisionSet.topics.length} topics revised
           </p>
 
