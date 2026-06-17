@@ -1,0 +1,258 @@
+@import "tailwindcss";
+
+:root {
+  /* Mauve palette */
+  --mauve-50: hsl(280, 25%, 98%);
+  --mauve-100: hsl(280, 20%, 95%);
+  --mauve-200: hsl(280, 18%, 90%);
+  --mauve-300: hsl(280, 15%, 82%);
+  --mauve-400: hsl(280, 13%, 70%);
+  --mauve-500: hsl(280, 12%, 58%);
+  --mauve-600: hsl(280, 15%, 48%);
+  --mauve-700: hsl(280, 18%, 38%);
+  --mauve-800: hsl(280, 20%, 28%);
+  --mauve-900: hsl(280, 22%, 20%);
+  --mauve-950: hsl(280, 25%, 12%);
+
+  /* App Theme */
+  --background: var(--mauve-50);
+  --background-soft: var(--mauve-100);
+  --background-muted: var(--mauve-200);
+
+  --foreground: var(--mauve-900);
+  --foreground-muted: var(--mauve-500);
+  --foreground-light: var(--mauve-400);
+
+  --border: var(--mauve-200);
+  --border-light: var(--mauve-100);
+
+  /* Primary buttons */
+  --primary: var(--mauve-600);
+  --primary-hover: var(--mauve-700);
+  --primary-light: var(--mauve-100);
+
+  /* Success */
+  --success: hsl(145, 30%, 42%);
+  --success-light: hsl(145, 45%, 94%);
+
+  /* Warning */
+  --warning: hsl(38, 85%, 55%);
+  --warning-light: hsl(45, 100%, 95%);
+
+  /* Error */
+  --danger: hsl(0, 70%, 60%);
+  --danger-light: hsl(0, 100%, 96%);
+
+  /* Cards */
+  --card: #ffffff;
+  --card-soft: var(--mauve-50);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 6px rgba(59, 48, 66, 0.05);
+  --shadow-md: 0 8px 24px rgba(59, 48, 66, 0.08);
+  --shadow-lg: 0 16px 40px rgba(59, 48, 66, 0.12);
+
+  /* Radius */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 30px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* Page Layout */
+
+.page {
+  min-height: 100vh;
+  padding: 2rem;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      var(--mauve-100) 0%,
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      var(--mauve-100) 0%,
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      var(--mauve-50),
+      #ffffff
+    );
+}
+
+.page-center {
+  min-height: 100vh;
+  padding: 2rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      var(--mauve-100) 0%,
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      var(--mauve-100) 0%,
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      var(--mauve-50),
+      #ffffff
+    );
+}
+
+/* Cards */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-large {
+  width: 100%;
+  max-width: 760px;
+  padding: 3rem;
+}
+
+.card-soft {
+  background: var(--card-soft);
+}
+
+/* Buttons */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 60px;
+
+  padding: 1rem 2rem;
+
+  border: none;
+  border-radius: 999px;
+
+  background: var(--primary);
+  color: white;
+
+  font-size: 1.05rem;
+  font-weight: 700;
+
+  box-shadow: var(--shadow-md);
+
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-row {
+  display: flex;
+  margin-top: 2rem;
+}
+
+/* Inputs */
+
+.input {
+  width: 100%;
+
+  padding: 1rem 1.1rem;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: white;
+
+  font-size: 1rem;
+
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: 3px solid var(--primary-light);
+  outline-offset: 2px;
+}
+
+/* Typography */
+
+.text-muted {
+  color: var(--foreground-muted);
+}
+
+.text-light {
+  color: var(--foreground-light);
+}
+
+/* Utility backgrounds */
+
+.bg-soft {
+  background: var(--mauve-100);
+}
+
+.bg-card {
+  background: white;
+}
+
+.bg-success {
+  background: var(--success-light);
+}
+
+.bg-warning {
+  background: var(--warning-light);
+}
+
+.bg-danger {
+  background: var(--danger-light);
+}
+
+/* Borders */
+
+.border-soft {
+  border: 1px solid var(--border);
+}
+
+/* Nice selection */
+
+::selection {
+  background: var(--mauve-300);
+  color: var(--mauve-950);
+}
