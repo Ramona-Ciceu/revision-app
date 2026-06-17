@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AppHeader from "@/components/app-header";
 import { supabase } from "@/lib/supabaseClient";
 import { createTopicKey } from "@/lib/createTopicKey";
 
@@ -54,11 +55,7 @@ export default function NewTopicPage() {
 
       if (existingSet) {
         localStorage.setItem("revision-set-id", existingSet.id);
-        localStorage.setItem(
-          "revision-set",
-          JSON.stringify(existingSet.content)
-        );
-
+        localStorage.setItem("revision-set", JSON.stringify(existingSet.content));
         window.location.href = "/topics/preview";
         return;
       }
@@ -117,91 +114,93 @@ export default function NewTopicPage() {
   }
 
   return (
-    <main className="page-center">
-      <section className="card card-large">
-        <p className="mb-3 text-sm font-bold uppercase tracking-wider text-muted">
-          Create revision set
-        </p>
+    <main className="page">
+      <div className="mx-auto max-w-5xl">
+        <AppHeader />
 
-        <h1 className="text-4xl font-extrabold text-[var(--foreground)]">
-          Add one subject with multiple topics
-        </h1>
+        <section className="card card-large mx-auto">
+          <p className="mb-3 text-sm font-bold uppercase tracking-wider text-muted">
+            Create revision set
+          </p>
 
-        <p className="mt-4 max-w-xl text-lg leading-8 text-muted">
-          If this revision set already exists, we will load it from your saved
-          revision. If not, Gemini will create it.
-        </p>
+          <h1 className="text-4xl font-extrabold text-[var(--foreground)]">
+            Add one subject with multiple topics
+          </h1>
 
-        <form onSubmit={handleSubmit} className="mt-8">
-          <div className="space-y-6">
-            <div>
-              <label className="mb-2 block text-base font-bold text-[var(--foreground)]">
-                Subject
-              </label>
+          <p className="mt-4 max-w-xl text-lg leading-8 text-muted">
+          </p>
 
-              <input
-                className="input"
-                placeholder="Example: Maths"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                required
+          <form onSubmit={handleSubmit} className="mt-8">
+            <div className="space-y-6">
+              <div>
+                <label className="mb-2 block text-base font-bold text-[var(--foreground)]">
+                  Subject
+                </label>
+
+                <input
+                  className="input"
+                  placeholder="Example: Maths"
+                  value={subject}
+                  onChange={(event) => setSubject(event.target.value)}
+                  required
+                  disabled={isGenerating}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-base font-bold text-[var(--foreground)]">
+                  Year Group
+                </label>
+
+                <input
+                  className="input"
+                  placeholder="Example: Year 7"
+                  value={ageLevel}
+                  onChange={(event) => setAgeLevel(event.target.value)}
+                  disabled={isGenerating}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-base font-bold text-[var(--foreground)]">
+                  Topics
+                </label>
+
+                <textarea
+                  className="input min-h-[180px] resize-none"
+                  placeholder={`Example:\nFractions\nDecimals\nPercentages`}
+                  value={topicsText}
+                  onChange={(event) => setTopicsText(event.target.value)}
+                  required
+                  disabled={isGenerating}
+                />
+
+                <p className="mt-2 text-sm text-muted">
+                  Put each topic on a new line.
+                </p>
+              </div>
+            </div>
+
+            {errorMessage && (
+              <div className="mt-6 rounded-3xl border-soft bg-danger p-5">
+                <p className="whitespace-pre-wrap font-bold text-[var(--foreground)]">
+                  {errorMessage}
+                </p>
+              </div>
+            )}
+
+            <div className="btn-row">
+              <button
+                className="btn-primary w-full sm:w-auto"
+                type="submit"
                 disabled={isGenerating}
-              />
+              >
+                {isGenerating ? "Checking and generating..." : "Create Revision"}
+              </button>
             </div>
-
-            <div>
-              <label className="mb-2 block text-base font-bold text-[var(--foreground)]">
-                Year Group
-              </label>
-
-              <input
-                className="input"
-                placeholder="Example: Year 7"
-                value={ageLevel}
-                onChange={(e) => setAgeLevel(e.target.value)}
-                disabled={isGenerating}
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-base font-bold text-[var(--foreground)]">
-                Topics
-              </label>
-
-              <textarea
-                className="input min-h-[180px] resize-none"
-                placeholder={`Example:\nFractions\nDecimals\nPercentages`}
-                value={topicsText}
-                onChange={(e) => setTopicsText(e.target.value)}
-                required
-                disabled={isGenerating}
-              />
-
-              <p className="mt-2 text-sm text-muted">
-                Put each topic on a new line.
-              </p>
-            </div>
-          </div>
-
-          {errorMessage && (
-            <div className="mt-6 rounded-3xl border-soft bg-danger p-5">
-              <p className="whitespace-pre-wrap font-bold text-[var(--foreground)]">
-                {errorMessage}
-              </p>
-            </div>
-          )}
-
-          <div className="btn-row">
-            <button
-              className="btn-primary w-full sm:w-auto"
-              type="submit"
-              disabled={isGenerating}
-            >
-              {isGenerating ? "Checking and generating..." : "Create Revision"}
-            </button>
-          </div>
-        </form>
-      </section>
+          </form>
+        </section>
+      </div>
     </main>
   );
 }

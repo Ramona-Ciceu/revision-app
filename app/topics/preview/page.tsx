@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AppHeader from "@/components/app-header";
 import type { RevisionSet } from "../../types/topic";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -46,22 +47,26 @@ export default function PreviewTopicPage() {
 
   if (!revisionSet) {
     return (
-      <main className="page-center">
-        <section className="card card-large">
-          <h1 className="text-4xl font-extrabold text-[var(--foreground)]">
-            No revision set found
-          </h1>
+      <main className="page">
+        <div className="mx-auto max-w-5xl">
+          <AppHeader />
 
-          <p className="mt-4 text-lg leading-8 text-muted">
-            Create a revision set first.
-          </p>
+          <section className="card card-large mx-auto">
+            <h1 className="text-4xl font-extrabold text-[var(--foreground)]">
+              No revision set found
+            </h1>
 
-          <div className="btn-row">
-            <a href="/topics/new" className="btn-primary w-full sm:w-auto">
-              Create Revision Set
-            </a>
-          </div>
-        </section>
+            <p className="mt-4 text-lg leading-8 text-muted">
+              Create a revision set first.
+            </p>
+
+            <div className="btn-row">
+              <a href="/topics/new" className="btn-primary w-full sm:w-auto">
+                Create Revision Set
+              </a>
+            </div>
+          </section>
+        </div>
       </main>
     );
   }
@@ -73,6 +78,8 @@ export default function PreviewTopicPage() {
   return (
     <main className="page">
       <div className="mx-auto max-w-5xl">
+        <AppHeader />
+
         <section className="card p-10">
           <p className="mb-3 text-sm font-bold uppercase tracking-wider text-muted">
             Revision preview

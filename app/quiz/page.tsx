@@ -1,88 +1,85 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RevisionSet } from "@/types/topic";
-
-type Question = {
-  topic: string;
-  question: string;
-  options: string[];
-  answer: string;
-  explanation: string;
-};
-
-function createQuestions(revisionSet: RevisionSet): Question[] {
-  return revisionSet.topics.map((topic) => ({
-    topic: topic.title,
-    question: `What is the best way to revise ${topic.title}?`,
-    options: [
-      "Break it into key points and use examples",
-      "Only read it once very quickly",
-      "Ignore the difficult words",
-      "Guess the answer without checking",
-    ],
-    answer: "Break it into key points and use examples",
-    explanation:
-      "Breaking a topic into key points and examples makes it easier to understand and remember.",
-  }));
-}
+import AppHeader from "@/components/app-header";
+import type { RevisionSet } from "../types/topic";
 
 export default function QuizPage() {
   const [revisionSet, setRevisionSet] = useState<RevisionSet | null>(null);
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [score, setScore] = useState<number | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("revision-set");
 
     if (saved) {
-      const parsedSet: RevisionSet = JSON.parse(saved);
-      setRevisionSet(parsedSet);
-      setQuestions(createQuestions(parsedSet));
+      setRevisionSet(JSON.parse(saved));
     }
   }, []);
 
-  function selectAnswer(questionIndex: number, answer: string) {
+  function selectAnswer(questionKey: string, answer: string) {
     setAnswers({
       ...answers,
-      [questionIndex]: answer,
+      [questionKey]: answer,
     });
   }
 
   function finishQuiz() {
-    const totalScore = questions.reduce((total, question, index) => {
-      return answers[index] === question.answer ? total + 1 : total;
-    }, 0);
+    if (!revisionSet) return;
 
-    setScore(totalScore);
+    let total = 0;
+
+    revisionSet.topics.forEach((topic, topicIndex) => {
+      topic.quiz.forEach((question, questionIndex) => {
+        const key = `${topicIndex}-${questionIndex}`;
+
+        if (answers[key] === question.answer) {
+          total += 1;
+        }
+      });
+    });
+
+    setScore(total);
   }
 
   if (!revisionSet) {
     return (
-      <main className="page-center">
-        <section className="card card-large">
-          <h1 className="text-4xl font-extrabold text-[var(--foreground)]">
-            No quiz found
-          </h1>
+      <main className="page">
+        <div className="mx-auto max-w-5xl">
+          <AppHeader />
 
-          <p className="mt-4 text-lg text-muted">
-            Create a revision set first.
-          </p>
+          <section className="card card-large mx-auto">
+            <h1 className="text-4xl font-extrabold text-[var(--foreground)]">
+              No quiz found
+            </h1>
 
-          <div className="btn-row">
-            <a href="/topics/new" className="btn-primary w-full sm:w-auto">
-              Create Revision Set
-            </a>
-          </div>
-        </section>
+            <p className="mt-4 text-lg leading-8 text-muted">
+              Create a revision set first.
+            </p>
+
+            <div className="btn-row">
+              <a href="/topics/new" className="btn-primary w-full sm:w-auto">
+                Create Revision Set
+              </a>
+            </div>
+          </section>
+        </div>
       </main>
     );
   }
 
+  const totalQuestions = revisionSet.topics.reduce(
+    (total, topic) => total + topic.quiz.length,
+    0
+  );
+
+  const answeredQuestions = Object.keys(answers).length;
+
   return (
     <main className="page">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-5xl">
+        <AppHeader />
+
         <section className="card p-10">
           <p className="mb-3 text-sm font-bold uppercase tracking-wider text-muted">
             Multiple choice quiz
@@ -93,65 +90,71 @@ export default function QuizPage() {
           </h1>
 
           <p className="mt-4 text-lg leading-8 text-muted">
-            Answer one question for each topic.
+            Answer each question, then check your score.
           </p>
 
           <div className="mt-10 grid gap-6">
-            {questions.map((question, index) => (
-              <article
-                key={question.topic}
-                className="rounded-3xl border-soft bg-card p-6"
-              >
-                <p className="text-sm font-bold uppercase tracking-wider text-muted">
-                  {question.topic}
-                </p>
+            {revisionSet.topics.map((topic, topicIndex) =>
+              topic.quiz.map((question, questionIndex) => {
+                const questionKey = `${topicIndex}-${questionIndex}`;
+                const selectedAnswer = answers[questionKey];
+                const isCorrect = selectedAnswer === question.answer;
 
-                <h2 className="mt-2 text-2xl font-bold text-[var(--foreground)]">
-                  {question.question}
-                </h2>
-
-                <div className="mt-6 space-y-4">
-                  {question.options.map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => selectAnswer(index, option)}
-                      className={`block w-full rounded-2xl border p-5 text-left text-lg font-semibold transition ${
-                        answers[index] === option
-                          ? "border-[var(--primary)] bg-soft text-[var(--foreground)]"
-                          : "border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-soft"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-
-                {score !== null && (
-                  <div
-                    className={`mt-5 rounded-3xl border-soft p-5 ${
-                      answers[index] === question.answer
-                        ? "bg-success"
-                        : "bg-warning"
-                    }`}
+                return (
+                  <article
+                    key={questionKey}
+                    className="rounded-3xl border-soft bg-card p-6 shadow-sm"
                   >
-                    <p className="font-bold text-[var(--foreground)]">
-                      {answers[index] === question.answer
-                        ? "Correct"
-                        : "Not quite"}
+                    <p className="text-sm font-bold uppercase tracking-wider text-muted">
+                      {topic.title}
                     </p>
 
-                    <p className="mt-2 text-muted">{question.explanation}</p>
-                  </div>
-                )}
-              </article>
-            ))}
+                    <h2 className="mt-2 text-2xl font-bold text-[var(--foreground)]">
+                      {question.question}
+                    </h2>
+
+                    <div className="mt-6 space-y-4">
+                      {question.options.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => selectAnswer(questionKey, option)}
+                          className={`block w-full rounded-2xl border p-5 text-left text-lg font-semibold transition ${
+                            selectedAnswer === option
+                              ? "border-[var(--primary)] bg-soft text-[var(--foreground)]"
+                              : "border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-soft"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+
+                    {score !== null && (
+                      <div
+                        className={`mt-5 rounded-3xl border-soft p-5 ${
+                          isCorrect ? "bg-success" : "bg-warning"
+                        }`}
+                      >
+                        <p className="font-bold text-[var(--foreground)]">
+                          {isCorrect ? "Correct" : "Not quite"}
+                        </p>
+
+                        <p className="mt-2 text-muted">
+                          {question.explanation}
+                        </p>
+                      </div>
+                    )}
+                  </article>
+                );
+              })
+            )}
           </div>
 
           <div className="btn-row">
             <button
               onClick={finishQuiz}
               className="btn-primary w-full sm:w-auto"
-              disabled={Object.keys(answers).length !== questions.length}
+              disabled={answeredQuestions !== totalQuestions}
             >
               Finish Quiz
             </button>
@@ -160,11 +163,11 @@ export default function QuizPage() {
           {score !== null && (
             <div className="mt-8 rounded-3xl border-soft bg-soft p-6">
               <h2 className="text-2xl font-bold text-[var(--foreground)]">
-                Score: {score}/{questions.length}
+                Score: {score}/{totalQuestions}
               </h2>
 
               <p className="mt-3 text-lg text-muted">
-                Review the explanations above and try again when ready.
+                Review the explanations above and revise any topics you missed.
               </p>
             </div>
           )}
