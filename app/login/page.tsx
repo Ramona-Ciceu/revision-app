@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 
 type AuthMode = "login" | "signup";
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +46,7 @@ export default function LoginPage() {
         }
 
         setMessage(
-          "Account created. Please check your email and click the confirmation link."
+          "Account created successfully. Please check your email and click the confirmation link."
         );
 
         return;
@@ -63,7 +65,9 @@ export default function LoginPage() {
       window.location.href = "/dashboard";
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Something went wrong."
+        error instanceof Error
+          ? error.message
+          : "Something went wrong."
       );
     } finally {
       setLoading(false);
@@ -78,17 +82,20 @@ export default function LoginPage() {
         </p>
 
         <h1 className="text-4xl font-extrabold text-[var(--foreground)]">
-          {mode === "signup" ? "Create your account" : "Welcome back"}
+          {mode === "signup"
+            ? "Create your account"
+            : "Welcome back"}
         </h1>
 
         <p className="mt-4 text-lg leading-8 text-muted">
           {mode === "signup"
-            ? "Enter your email and choose a password to create your Revision Buddy account."
-            : "Enter your email and password to continue revising."}
+            ? "Create your Revision Buddy account."
+            : "Sign in to continue revising."}
         </p>
 
         <div className="mt-8 grid grid-cols-2 rounded-full border border-[var(--border)] bg-soft p-2">
           <button
+            type="button"
             onClick={() => {
               setMode("signup");
               setMessage("");
@@ -103,6 +110,7 @@ export default function LoginPage() {
           </button>
 
           <button
+            type="button"
             onClick={() => {
               setMode("login");
               setMessage("");
@@ -127,18 +135,32 @@ export default function LoginPage() {
             disabled={loading}
           />
 
-          <input
-            className="input"
-            type="password"
-            placeholder={
-              mode === "signup"
-                ? "Create a password"
-                : "Enter your password"
-            }
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={loading}
-          />
+          <div className="relative">
+            <input
+              className="input pr-14"
+              type={showPassword ? "text" : "password"}
+              placeholder={
+                mode === "signup"
+                  ? "Create a password"
+                  : "Enter your password"
+              }
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={loading}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-5 top-1/2 flex -translate-y-1/2 items-center justify-center text-[var(--color-mauve-600)] transition hover:text-[var(--foreground)]"
+            >
+              {showPassword ? (
+                <EyeOff size={20} />
+              ) : (
+                <Eye size={20} />
+              )}
+            </button>
+          </div>
 
           {message && (
             <div className="rounded-3xl border-soft bg-warning p-5">
@@ -149,6 +171,7 @@ export default function LoginPage() {
           )}
 
           <button
+            type="button"
             onClick={handleAuth}
             className="btn-primary w-full"
             disabled={loading}
