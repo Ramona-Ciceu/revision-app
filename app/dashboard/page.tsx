@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AppHeader from "@/components/app-header";
 import { supabase } from "@/lib/supabaseClient";
-import type { RevisionSet, RevisionTopic } from "../../types/topic";
+import type { RevisionSet, RevisionTopic } from "../types/topic";
 
 type SavedRevisionRow = {
   id: string;
