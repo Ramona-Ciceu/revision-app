@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BookOpen, Home, LogOut, Menu, PlusCircle, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function AppHeader() {
   const [userEmail, setUserEmail] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     async function loadUser() {
@@ -36,53 +38,117 @@ export default function AppHeader() {
     ? firstName.charAt(0).toUpperCase() + firstName.slice(1)
     : "there";
 
+  const navLinks = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: Home,
+    },
+    {
+      label: "New Revision",
+      href: "/topics/new",
+      icon: PlusCircle,
+    },
+    {
+      label: "Quiz",
+      href: "/quiz",
+      icon: BookOpen,
+    },
+  ];
+
   return (
-    <header className="mb-8 rounded-3xl border-soft bg-card p-6 shadow-sm">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold text-[var(--foreground)]">
-            Revision Buddy
-          </h1>
+    <header className="sticky top-4 z-50 mb-8">
+      <nav className="rounded-full border border-[var(--border)] bg-white/90 px-5 py-3 shadow-md backdrop-blur">
+        <div className="flex items-center justify-between gap-4">
+          <a href="/dashboard" className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-soft font-extrabold text-[var(--foreground)]">
+              RB
+            </div>
 
-          <p className="mt-2 text-muted">Welcome back, {displayName}</p>
+            <div>
+              <p className="text-lg font-extrabold text-[var(--foreground)]">
+                Revision Buddy
+              </p>
 
-          {userEmail && (
-            <p className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+              <p className="hidden text-xs font-semibold text-muted sm:block">
+                Welcome, {displayName}
+              </p>
+            </div>
+          </a>
+
+          <div className="hidden items-center gap-2 md:flex">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-soft hover:text-[var(--foreground)]"
+                >
+                  <Icon size={17} />
+                  {link.label}
+                </a>
+              );
+            })}
+          </div>
+
+          <div className="hidden items-center gap-3 md:flex">
+            <div className="max-w-[220px] truncate rounded-full bg-soft px-4 py-2 text-sm font-semibold text-[var(--foreground)]">
               {userEmail}
-            </p>
-          )}
-        </div>
+            </div>
 
-        <nav className="flex flex-wrap gap-3">
-          <a
-            href="/dashboard"
-            className="rounded-full border border-[var(--border)] px-5 py-3 font-semibold text-muted transition hover:bg-soft"
-          >
-            Dashboard
-          </a>
-
-          <a
-            href="/topics/new"
-            className="rounded-full border border-[var(--border)] px-5 py-3 font-semibold text-muted transition hover:bg-soft"
-          >
-            New Revision
-          </a>
-
-          <a
-            href="/quiz"
-            className="rounded-full border border-[var(--border)] px-5 py-3 font-semibold text-muted transition hover:bg-soft"
-          >
-            Quiz
-          </a>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-100"
+            >
+              <LogOut size={17} />
+              Logout
+            </button>
+          </div>
 
           <button
-            onClick={handleLogout}
-            className="rounded-full border border-red-200 bg-red-50 px-5 py-3 font-semibold text-red-700 transition hover:bg-red-100"
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] text-[var(--foreground)] md:hidden"
           >
-            Logout
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
-        </nav>
-      </div>
+        </div>
+
+        {menuOpen && (
+          <div className="mt-4 border-t border-[var(--border)] pt-4 md:hidden">
+            <p className="mb-3 rounded-2xl bg-soft p-4 text-sm font-semibold text-[var(--foreground)]">
+              {userEmail}
+            </p>
+
+            <div className="grid gap-2">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="flex items-center gap-3 rounded-2xl px-4 py-3 font-bold text-muted transition hover:bg-soft hover:text-[var(--foreground)]"
+                  >
+                    <Icon size={18} />
+                    {link.label}
+                  </a>
+                );
+              })}
+
+              <button
+                onClick={handleLogout}
+                className="mt-2 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-bold text-red-700 transition hover:bg-red-100"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
+          </div>
+        )}
+      </nav>
     </header>
   );
 }
