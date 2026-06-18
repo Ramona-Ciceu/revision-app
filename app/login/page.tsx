@@ -92,38 +92,37 @@ export default function LoginPage() {
             ? "Create your Revision Buddy account."
             : "Sign in to continue revising."}
         </p>
+<div className="mt-8 grid grid-cols-2 rounded-full border border-[var(--border)] bg-soft p-2">
+  <button
+    type="button"
+    onClick={() => {
+      setMode("login");
+      setMessage("");
+    }}
+    className={`rounded-full px-5 py-3 font-bold transition ${
+      mode === "login"
+        ? "bg-white text-[var(--foreground)] shadow-sm"
+        : "text-muted"
+    }`}
+  >
+    Login
+  </button>
 
-        <div className="mt-8 grid grid-cols-2 rounded-full border border-[var(--border)] bg-soft p-2">
-          <button
-            type="button"
-            onClick={() => {
-              setMode("signup");
-              setMessage("");
-            }}
-            className={`rounded-full px-5 py-3 font-bold transition ${
-              mode === "signup"
-                ? "bg-white text-[var(--foreground)] shadow-sm"
-                : "text-muted"
-            }`}
-          >
-            Create Account
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMode("login");
-              setMessage("");
-            }}
-            className={`rounded-full px-5 py-3 font-bold transition ${
-              mode === "login"
-                ? "bg-white text-[var(--foreground)] shadow-sm"
-                : "text-muted"
-            }`}
-          >
-            Login
-          </button>
-        </div>
+  <button
+    type="button"
+    onClick={() => {
+      setMode("signup");
+      setMessage("");
+    }}
+    className={`rounded-full px-5 py-3 font-bold transition ${
+      mode === "signup"
+        ? "bg-white text-[var(--foreground)] shadow-sm"
+        : "text-muted"
+    }`}
+  >
+    Create Account
+  </button>
+</div>
 
         <div className="mt-8 space-y-6">
           <input

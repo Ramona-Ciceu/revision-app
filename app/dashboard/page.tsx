@@ -103,11 +103,6 @@ export default function DashboardPage() {
             Your Revision Topics
           </h1>
 
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            These are saved from Supabase. If you log out and come back, they
-            should still be here.
-          </p>
-
           <div className="btn-row">
             <a href="/topics/new" className="btn-primary w-full sm:w-auto">
               Create New Revision
