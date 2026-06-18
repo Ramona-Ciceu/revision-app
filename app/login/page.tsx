@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 type AuthMode = "login" | "signup";
 
 export default function LoginPage() {
-  const [mode, setMode] = useState<AuthMode>("signup");
+  const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
