@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import Link from "next/link";
 
 type AuthMode = "login" | "signup";
 
@@ -168,7 +169,12 @@ export default function LoginPage() {
               </p>
             </div>
           )}
-
+<Link
+  href="/forgot-password"
+  className="text-sm text-purple-700 hover:underline"
+>
+  Forgot password?
+</Link>
           <button
             type="button"
             onClick={handleAuth}
